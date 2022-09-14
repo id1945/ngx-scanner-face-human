@@ -69,7 +69,7 @@
     "@tensorflow/tfjs-layers": "^3.20.0",
     "@tensorflow/tfjs-node": "^3.20.0",
     "@tensorflow/tfjs-node-gpu": "^3.20.0",
-    "@tensorflow/tfjs-tflite": "0.0.1-alpha.8",
+    "@tensorflow/tfjs-tflite": "0.0.1-alpha.8"
   },
   "devDependencies": {},
   "scripts": {
