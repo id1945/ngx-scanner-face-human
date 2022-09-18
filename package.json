@@ -48,7 +48,8 @@
     "ngx-face-landmarks-detection",
     "hand-pose-detection",
     "ngx-hand-pose-detection",
-    "ngx-pose-detection"
+    "ngx-pose-detection",
+    "ngx-pose-detection-mesh"
   ],
   "author": "DaiDH <duonghuudai.id002@gmail.com>",
   "license": "MIT",
@@ -59,9 +60,17 @@
   "main": "human.esm.js",
   "dependencies": {
     "@tensorflow/tfjs": "^3.20.0",
-    "@tensorflow/tfjs-core": "^3.20.0",
+    "@tensorflow/tfjs-backend-cpu": "^3.20.0",
+    "@tensorflow/tfjs-backend-wasm": "^3.20.0",
+    "@tensorflow/tfjs-backend-webgl": "^3.20.0",
+    "@tensorflow/tfjs-backend-webgpu": "0.0.1-alpha.13",
     "@tensorflow/tfjs-converter": "^3.20.0",
-    "@tensorflow/tfjs-backend-webgl": "^3.20.0"
+    "@tensorflow/tfjs-core": "^3.20.0",
+    "@tensorflow/tfjs-data": "^3.20.0",
+    "@tensorflow/tfjs-layers": "^3.20.0",
+    "@tensorflow/tfjs-node": "^3.20.0",
+    "@tensorflow/tfjs-node-gpu": "^3.20.0",
+    "@tensorflow/tfjs-tflite": "0.0.1-alpha.8"
   },
   "devDependencies": {},
   "scripts": {
