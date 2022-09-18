@@ -1,6 +1,6 @@
 {
   "name": "ngx-scanner-face-human",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "This library is built to provide a solution analysis of human face recognition.",
   "keywords": [
     "ai",
@@ -60,17 +60,9 @@
   "main": "human.esm.js",
   "dependencies": {
     "@tensorflow/tfjs": "^3.20.0",
-    "@tensorflow/tfjs-backend-cpu": "^3.20.0",
-    "@tensorflow/tfjs-backend-wasm": "^3.20.0",
-    "@tensorflow/tfjs-backend-webgl": "^3.20.0",
-    "@tensorflow/tfjs-backend-webgpu": "0.0.1-alpha.13",
-    "@tensorflow/tfjs-converter": "^3.20.0",
     "@tensorflow/tfjs-core": "^3.20.0",
-    "@tensorflow/tfjs-data": "^3.20.0",
-    "@tensorflow/tfjs-layers": "^3.20.0",
-    "@tensorflow/tfjs-node": "^3.20.0",
-    "@tensorflow/tfjs-node-gpu": "^3.20.0",
-    "@tensorflow/tfjs-tflite": "0.0.1-alpha.8"
+    "@tensorflow/tfjs-converter": "^3.20.0",
+    "@tensorflow/tfjs-backend-webgl": "^3.20.0"
   },
   "devDependencies": {},
   "scripts": {
