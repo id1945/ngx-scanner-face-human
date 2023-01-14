@@ -33,6 +33,17 @@ Angular [npm](https://www.npmjs.com/package/ngx-scanner-face)
   </tr>
 </table>
 
+#### If you want donate for me!
+
+<table>
+  <tr>
+    <th>Bitcoin</th>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/id1945/id1945/master/donate-bitcoin.png" width="182px"></td>
+  </tr>
+</table>
+
 ![Vietnam](https://raw.githubusercontent.com/id1945/id1945/master/vietnam.gif)
 
 [MIT License](https://github.com/id1945/ngx-scanner-face-human/blob/master/LICENSE). Copyright (c) 2021 DaiDH
