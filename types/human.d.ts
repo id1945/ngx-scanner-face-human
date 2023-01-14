@@ -1,10 +1,8 @@
-/// <reference path="../src/types/webgpu.d.ts" />
-
 /** meta-function that performs draw for: canvas, face, body, hand */
 declare function all(inCanvas: AnyCanvas, result: Result, drawOptions?: Partial<DrawOptions>): Promise<[void, void, void, void, void] | null>;
 
 /** Defines all possible canvas types */
-export declare type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
+export declare type AnyCanvas = HTMLCanvasElement | any;
 
 /** Defines all possible image types */
 export declare type AnyImage = HTMLImageElement | typeof Image;
@@ -497,7 +495,7 @@ export declare class Env {
     webgpu: {
         supported: undefined | boolean;
         backend: undefined | boolean;
-        adapter: undefined | GPUAdapterInfo;
+        adapter: undefined | any;
     };
     /** CPU info */
     cpu: {
@@ -899,7 +897,7 @@ declare function getWeightSpecs(weightsManifest: WeightsManifestConfig): Weights
 declare interface GPUData {
     tensorRef: Tensor;
     texture?: WebGLTexture;
-    buffer?: GPUBuffer;
+    buffer?: any;
     texShape?: [number, number];
     bufSize?: number;
 }
