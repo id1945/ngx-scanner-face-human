@@ -1,6 +1,6 @@
 {
   "name": "ngx-scanner-face-human",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "This library is built to provide a solution analysis of human face recognition.",
   "keywords": [
     "ai",
@@ -58,10 +58,14 @@
     "url": "git+ssh://github.com/id1945/ngx-scanner-face-human.git"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^3.20.0",
-    "@tensorflow/tfjs-core": "^3.20.0",
-    "@tensorflow/tfjs-converter": "^3.20.0",
-    "@tensorflow/tfjs-backend-webgl": "^3.20.0"
+    "@tensorflow/tfjs-core": "^4.2.0",
+    "@tensorflow/tfjs-node": "^4.2.0",
+    "@tensorflow/tfjs-node-gpu": "^4.2.0",
+    "@tensorflow/tfjs-converter": "^4.2.0",
+    "@tensorflow/tfjs-backend-cpu": "^4.2.0",
+    "@tensorflow/tfjs-backend-wasm": "^4.2.0",
+    "@tensorflow/tfjs-backend-webgl": "^4.2.0",
+    "@tensorflow/tfjs-backend-webgpu": "0.0.1-alpha.17"
   },
   "devDependencies": {},
   "scripts": {

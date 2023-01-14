@@ -1,8 +1,10 @@
+/// <reference path="../src/types/webgpu.d.ts" />
+
 /** meta-function that performs draw for: canvas, face, body, hand */
 declare function all(inCanvas: AnyCanvas, result: Result, drawOptions?: Partial<DrawOptions>): Promise<[void, void, void, void, void] | null>;
 
 /** Defines all possible canvas types */
-export declare type AnyCanvas = HTMLCanvasElement | any;
+export declare type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 
 /** Defines all possible image types */
 export declare type AnyImage = HTMLImageElement | typeof Image;
@@ -42,7 +44,7 @@ export declare interface BodyConfig extends GenericConfig {
 }
 
 /** body gesture type */
-export declare type BodyGesture = 'leaning left' | 'leaning right' | 'raise left hand' | 'raise right hand' | 'i give up';
+export declare type BodyGesture = `leaning ${'left' | 'right'}` | `raise ${'left' | 'right'} hand` | 'i give up';
 
 /** Body Result keypoints */
 export declare interface BodyKeypoint {
@@ -445,6 +447,7 @@ declare function encodeWeights(tensors: NamedTensorMap | NamedTensor[], group?: 
 
 /** Env class that holds detected capabilities */
 export declare class Env {
+    #private;
     /** Running in Browser */
     browser: boolean;
     /** Running in NodeJS */
@@ -494,7 +497,7 @@ export declare class Env {
     webgpu: {
         supported: undefined | boolean;
         backend: undefined | boolean;
-        adapter: undefined | any;
+        adapter: undefined | GPUAdapterInfo;
     };
     /** CPU info */
     cpu: {
@@ -594,7 +597,7 @@ export declare interface FaceGearConfig extends GenericConfig {
 }
 
 /** face gesture type */
-export declare type FaceGesture = 'facing left' | 'facing center' | 'facing right' | 'blink left eye' | 'blink right eye' | `mouth ${number}% open` | 'head up' | 'head down';
+export declare type FaceGesture = `facing ${'left' | 'center' | 'right'}` | `blink ${'left' | 'right'} eye` | `mouth ${number}% open` | `head ${'up' | 'down'}`;
 
 /** Iris part of face configuration */
 export declare interface FaceIrisConfig extends GenericConfig {
@@ -896,7 +899,7 @@ declare function getWeightSpecs(weightsManifest: WeightsManifestConfig): Weights
 declare interface GPUData {
     tensorRef: Tensor;
     texture?: WebGLTexture;
-    buffer?: any;
+    buffer?: GPUBuffer;
     texShape?: [number, number];
     bufSize?: number;
 }
@@ -1172,7 +1175,7 @@ export declare interface HandConfig extends GenericConfig {
 }
 
 /** hand gesture type */
-export declare type HandGesture = 'thumb forward' | 'index forward' | 'middle forward' | 'ring forward' | 'pinky forward' | 'thumb up' | 'index up' | 'middle up' | 'ring up' | 'pinky up' | 'victory' | 'thumbs up';
+export declare type HandGesture = `${'thumb' | 'index' | 'middle' | 'ring' | 'pinky'} forward` | `${'thumb' | 'index' | 'middle' | 'ring' | 'pinky'} up` | 'victory' | 'thumbs up';
 
 /** Hand results */
 export declare interface HandResult {
@@ -1287,6 +1290,7 @@ declare function http(path: string, loadOptions?: LoadOptions): IOHandler;
  * @returns instance of {@link Human}
  */
 declare class Human {
+    #private;
     /** Current version of Human library in *semver* format */
     version: string;
     /** Current configuration
@@ -1587,7 +1591,7 @@ declare type IOHandlerSync = {
 declare type IORouter = (url: string | string[], loadOptions?: LoadOptions) => IOHandler;
 
 /** iris gesture type */
-export declare type IrisGesture = 'facing center' | 'looking left' | 'looking right' | 'looking up' | 'looking down' | 'looking center';
+export declare type IrisGesture = 'facing center' | `looking ${'left' | 'right' | 'up' | 'down'}` | 'looking center';
 
 declare function isHTTPScheme(url: string): boolean;
 
@@ -2342,6 +2346,7 @@ export declare type SegmentationEnum = 'default' | 'alpha' | 'foreground' | 'sta
  * =============================================================================
  */
 /// <amd-module name="@tensorflow/tfjs-core/dist/types" />
+/// <reference path="../src/types/webgpu.d.ts" />
 /** @docalias number[] */
 declare interface ShapeMap {
     R0: number[];
