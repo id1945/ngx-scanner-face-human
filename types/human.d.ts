@@ -1,8 +1,10 @@
+/// <reference path="../src/types/webgpu.d.ts" />
+
 /** meta-function that performs draw for: canvas, face, body, hand */
 declare function all(inCanvas: AnyCanvas, result: Result, drawOptions?: Partial<DrawOptions>): Promise<[void, void, void, void, void] | null>;
 
 /** Defines all possible canvas types */
-export declare type AnyCanvas = HTMLCanvasElement | any;
+export declare type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 
 /** Defines all possible image types */
 export declare type AnyImage = HTMLImageElement | typeof Image;
@@ -495,7 +497,7 @@ export declare class Env {
     webgpu: {
         supported: undefined | boolean;
         backend: undefined | boolean;
-        adapter: undefined | any;
+        adapter: undefined | GPUAdapterInfo;
     };
     /** CPU info */
     cpu: {
@@ -573,6 +575,8 @@ export declare interface FaceDetectorConfig extends GenericConfig {
     maxDetected: number;
     /** minimum confidence for a detected face before results are discarded */
     minConfidence: number;
+    /** minimum size in pixels of a detected face box before resutls are discared */
+    minSize: number;
     /** minimum overlap between two detected faces before one is discarded */
     iouThreshold: number;
     /** should child models perform on masked image of a face */
@@ -630,6 +634,8 @@ export declare interface FaceResult {
     box: Box;
     /** detected face box normalized to 0..1 */
     boxRaw: Box;
+    /** detected face box size */
+    size: [number, number];
     /** detected face mesh */
     mesh: Point[];
     /** detected face mesh normalized to 0..1 */
@@ -897,9 +903,8 @@ declare function getWeightSpecs(weightsManifest: WeightsManifestConfig): Weights
 declare interface GPUData {
     tensorRef: Tensor;
     texture?: WebGLTexture;
-    buffer?: any;
+    buffer?: GPUBuffer;
     texShape?: [number, number];
-    bufSize?: number;
 }
 
 /**
@@ -2183,6 +2188,10 @@ export declare enum Rank {
     R6 = "R6"
 }
 
+declare interface RecursiveArray<T extends any> {
+    [index: number]: T | RecursiveArray<T>;
+}
+
 declare const registerLoadRouter: (loudRouter: IORouter) => void;
 
 declare const registerSaveRouter: (loudRouter: IORouter) => void;
@@ -2476,12 +2485,10 @@ export declare class Tensor<R extends Rank = Rank> implements TensorInfo {
      *        texShape: [number, number] // [height, width]
      *     }
      *
-     *     For WebGPU backend, a GPUData contains the new buffer and
-     *     its information.
+     *     For WebGPU backend, a GPUData contains the new buffer.
      *     {
      *        tensorRef: The tensor that is associated with this buffer,
      *        buffer: GPUBuffer,
-     *        bufSize: number
      *     }
      *
      *     Remember to dispose the GPUData after it is used by
@@ -2530,6 +2537,15 @@ export declare class Tensor<R extends Rank = Rank> implements TensorInfo {
     toString(verbose?: boolean): string;
     variable(trainable?: boolean, name?: string, dtype?: DataType): Variable<R>;
 }
+
+/** @doclink Tensor */
+export declare type Tensor1D = Tensor<Rank.R1>;
+
+/** @doclink Tensor */
+export declare type Tensor2D = Tensor<Rank.R2>;
+
+/** @doclink Tensor */
+export declare type Tensor3D = Tensor<Rank.R3>;
 
 /** @doclink Tensor */
 export declare type Tensor4D = Tensor<Rank.R4>;
@@ -2590,6 +2606,9 @@ declare interface TensorInfo_2 {
     dtype: DataType;
 }
 
+/** @docalias TypedArray|Array */
+export declare type TensorLike = TypedArray | number | boolean | string | RecursiveArray<number | number[] | TypedArray> | RecursiveArray<boolean> | RecursiveArray<string> | Uint8Array[];
+
 /** Model training configuration. */
 declare interface TrainingConfig {
     /** Optimizer used for the model training. */
@@ -2608,6 +2627,8 @@ declare interface TrainingConfig {
         [key: string]: number;
     };
 }
+
+declare type TypedArray = Float32Array | Int32Array | Uint8Array;
 
 declare type Url = string | io.IOHandler | io.IOHandlerSync;
 

@@ -1,6 +1,6 @@
 {
   "name": "ngx-scanner-face-human",
-  "version": "1.0.16",
+  "version": "1.1.0",
   "description": "This library is built to provide a solution analysis of human face recognition.",
   "keywords": [
     "ai",
@@ -49,7 +49,28 @@
     "hand-pose-detection",
     "ngx-hand-pose-detection",
     "ngx-pose-detection",
-    "ngx-pose-detection-mesh"
+    "ngx-pose-detection-mesh",
+    "human-library",
+    "face-detection",
+    "faceid",
+    "face-geometry",
+    "face-embedding",
+    "face-recognition",
+    "face-description",
+    "face-matching",
+    "body-tracking",
+    "body-segmentation",
+    "hand-tracking",
+    "iris-tracking",
+    "age-estimation",
+    "emotion-detection",
+    "gender-prediction",
+    "gesture-recognition",
+    "gaze-tracking",
+    "age-gender",
+    "tensorflowjs",
+    "tfjs",
+    "tensorflow"
   ],
   "author": "DaiDH <duonghuudai.id002@gmail.com>",
   "license": "MIT",
@@ -58,13 +79,13 @@
     "url": "git+ssh://github.com/id1945/ngx-scanner-face-human.git"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^4.2.0",
-    "@tensorflow/tfjs-core": "^4.2.0",
-    "@tensorflow/tfjs-converter": "^4.2.0",
-    "@tensorflow/tfjs-backend-cpu": "^4.2.0",
-    "@tensorflow/tfjs-backend-wasm": "^4.2.0",
-    "@tensorflow/tfjs-backend-webgl": "^4.2.0",
-    "@tensorflow/tfjs-backend-webgpu": "0.0.1-alpha.17"
+    "@tensorflow/tfjs": "^4.5.0",
+    "@tensorflow/tfjs-core": "^4.5.0",
+    "@tensorflow/tfjs-converter": "^4.5.0",
+    "@tensorflow/tfjs-backend-cpu": "^4.5.0",
+    "@tensorflow/tfjs-backend-wasm": "^4.5.0",
+    "@tensorflow/tfjs-backend-webgl": "^4.5.0",
+    "@tensorflow/tfjs-backend-webgpu": "0.0.1-alpha.20"
   },
   "devDependencies": {},
   "scripts": {
@@ -94,11 +115,17 @@
     "script": "./human.js",
     "module": "./human.esm.js",
     "types": "./types/human.d.ts",
+    "human": "./human.js",
     "human.js": "./human.js",
+    "human.esm": "./human.esm.js",
     "human.esm.js": "./human.esm.js",
+    "human.esm-nobundle": "./human.esm-nobundle.js",
     "human.esm-nobundle.js": "./human.esm-nobundle.js",
+    "human.node": "./human.node.js",
     "human.node.js": "./human.node.js",
+    "human.node-wasm": "./human.node-wasm.js",
     "human.node-wasm.js": "./human.node-wasm.js",
+    "human.node-gpu": "./human.node-gpu.js",
     "human.node-gpu.js": "./human.node-gpu.js"
   }
 }

@@ -68,7 +68,7 @@ export declare class AdadeltaOptimizer extends Optimizer {
     protected rho: number;
     protected epsilon: number;
     /** @nocollapse */
-    static className: string;
+    static get className(): string;
     private accumulatedGrads;
     private accumulatedUpdates;
     constructor(learningRate: number, rho: number, epsilon?: number);
@@ -86,7 +86,7 @@ export declare class AdagradOptimizer extends Optimizer {
     protected learningRate: number;
     private initialAccumulatorValue;
     /** @nocollapse */
-    static className: string;
+    static get className(): string;
     private accumulatedGrads;
     constructor(learningRate: number, initialAccumulatorValue?: number);
     applyGradients(variableGradients: NamedVariableMap | NamedTensor[]): void;
@@ -105,7 +105,7 @@ export declare class AdamaxOptimizer extends Optimizer {
     protected epsilon: number;
     protected decay: number;
     /** @nocollapse */
-    static className: string;
+    static get className(): string;
     private accBeta1;
     private iteration;
     private accumulatedFirstMoment;
@@ -126,7 +126,7 @@ export declare class AdamOptimizer extends Optimizer {
     protected beta2: number;
     protected epsilon: number;
     /** @nocollapse */
-    static className: string;
+    static get className(): string;
     private accBeta1;
     private accBeta2;
     private accumulatedFirstMoment;
@@ -363,6 +363,8 @@ declare interface ArrayMap {
 }
 
 declare function arraysEqual(n1: FlatVector, n2: FlatVector): boolean;
+
+declare function arraysEqualWithNull(n1: number[], n2: number[]): boolean;
 
 export declare const Asin = "Asin";
 
@@ -709,6 +711,7 @@ declare namespace backend_util {
         computeDefaultPad,
         tupleValuesAreOne,
         eitherStridesOrDilationsAreOne,
+        stridesOrDilationsArePositive,
         convertConv2DDataFormat,
         checkPadOnDimRoundingMode,
         ExplicitPadding,
@@ -993,6 +996,34 @@ export declare interface BincountAttrs {
 
 export declare type BincountInputs = Pick<NamedTensorInfoMap, 'x' | 'weights'>;
 
+export declare const BitwiseAnd = "BitwiseAnd";
+
+export declare const bitwiseAnd: typeof bitwiseAnd_;
+
+/**
+ * Bitwise `AND` operation for input tensors.
+ *
+ * Given two input tensors, returns a new tensor
+ * with the `AND` calculated values.
+ *
+ * The method supports int32 values
+ *
+ *
+ * ```js
+ * const x = tf.tensor1d([0, 5, 3, 14], 'int32');
+ * const y = tf.tensor1d([5, 0, 7, 11], 'int32');
+ * tf.bitwiseAnd(x, y).print();
+ * ```
+ *
+ * @param x The input tensor to be calculated.
+ * @param y The input tensor to be calculated.
+ *
+ * @doc {heading: 'Operations', subheading: 'Logical'}
+ */
+declare function bitwiseAnd_<R extends Rank>(x: Tensor, y: Tensor): Tensor<R>;
+
+export declare type BitwiseAndInputs = BinaryInputs;
+
 export declare const booleanMaskAsync: typeof booleanMaskAsync_;
 
 /**
@@ -1077,6 +1108,7 @@ declare namespace browser {
     export {
         fromPixelsAsync,
         toPixels,
+        draw,
         fromPixels
     }
 }
@@ -1354,6 +1386,37 @@ declare function complexWithOddIndex(complex: Float32Array): {
 };
 
 /**
+ * Wraps a list of ArrayBuffers into a `slice()`-able object without allocating
+ * a large ArrayBuffer.
+ *
+ * Allocating large ArrayBuffers (~2GB) can be unstable on Chrome. TFJS loads
+ * its weights as a list of (usually) 4MB ArrayBuffers and then slices the
+ * weight tensors out of them. For small models, it's safe to concatenate all
+ * the weight buffers into a single ArrayBuffer and then slice the weight
+ * tensors out of it, but for large models, a different approach is needed.
+ */
+declare class CompositeArrayBuffer {
+    private shards;
+    private previousShardIndex;
+    private bufferUniformSize?;
+    readonly byteLength: number;
+    /**
+     * Concatenate a number of ArrayBuffers into one.
+     *
+     * @param buffers An array of ArrayBuffers to concatenate, or a single
+     *     ArrayBuffer.
+     * @returns Result of concatenating `buffers` in order.
+     */
+    static join(buffers?: ArrayBuffer[] | ArrayBuffer): ArrayBuffer;
+    constructor(buffers?: ArrayBuffer | ArrayBuffer[] | TypedArray | TypedArray[]);
+    slice(start?: number, end?: number): ArrayBuffer;
+    /**
+     * Get the index of the shard that contains the byte at `byteIndex`.
+     */
+    private findShardForByte;
+}
+
+/**
  * Computes the information for a forward pass of a convolution/pooling
  * operation.
  */
@@ -1561,10 +1624,13 @@ export declare interface ConcatAttrs {
 /**
  * Concatenate a number of ArrayBuffers into one.
  *
- * @param buffers A number of array buffers to concatenate.
+ * @param buffers An array of ArrayBuffers to concatenate, or a single
+ *     ArrayBuffer.
  * @returns Result of concatenating `buffers` in order.
+ *
+ * @deprecated Use tf.io.CompositeArrayBuffer.join() instead.
  */
-declare function concatenateArrayBuffers(buffers: ArrayBuffer[]): ArrayBuffer;
+declare function concatenateArrayBuffers(buffers: ArrayBuffer[] | ArrayBuffer): ArrayBuffer;
 
 export declare type ConcatInputs = TensorInfo[];
 
@@ -1640,6 +1706,19 @@ declare const confusionMatrix: typeof confusionMatrix_;
  * @doc {heading: 'Operations', subheading: 'Evaluation'}
  */
 declare function confusionMatrix_(labels: Tensor1D | TensorLike, predictions: Tensor1D | TensorLike, numClasses: number): Tensor2D;
+
+declare interface ContextOptions {
+    /**
+     * Optional.  If the canvas has created a context, it would not make effects.
+     * If it is not set, it would be variable based on the current backend.
+     */
+    contextType?: string;
+    /**
+     * Optional. A WebGLContextAttributes configuration. If the canvas has created
+     * a context, it would not make effects.
+     */
+    contextAttributes?: WebGLContextAttributes;
+}
 
 export declare const conv1d: typeof conv1d_;
 
@@ -1939,6 +2018,7 @@ declare namespace conv_util {
         computeDefaultPad,
         tupleValuesAreOne,
         eitherStridesOrDilationsAreOne,
+        stridesOrDilationsArePositive,
         convertConv2DDataFormat,
         checkPadOnDimRoundingMode,
         ExplicitPadding,
@@ -1948,6 +2028,8 @@ declare namespace conv_util {
         Conv3DInfo
     }
 }
+
+declare function convertBackendValuesAndArrayBuffer(data: BackendValues | ArrayBuffer, dtype: DataType): Uint8Array | Int32Array | Float32Array | Uint8Array[];
 
 /**
  * Convert Conv2D dataFormat from 'NHWC'|'NCHW' to
@@ -2258,6 +2340,8 @@ export declare interface DataToGPUWebGLOption {
 /** @docalias 'float32'|'int32'|'bool'|'complex64'|'string' */
 export declare type DataType = keyof DataTypeMap;
 
+export declare type DataTypeFor<T extends number | string | boolean> = T extends number | boolean ? NumericDataType : T extends string ? 'string' : never;
+
 export declare interface DataTypeMap {
     float32: Float32Array;
     int32: Int32Array;
@@ -2305,15 +2389,16 @@ declare function decodeString(bytes: Uint8Array, encoding?: string): string;
  *
  * This function is the reverse of `encodeWeights`.
  *
- * @param buffer A flat ArrayBuffer carrying the binary values of the tensors
- *   concatenated in the order specified in `specs`.
+ * @param weightData A flat ArrayBuffer or an array of ArrayBuffers carrying the
+ *   binary values of the tensors concatenated in the order specified in
+ *   `specs`.
  * @param specs Specifications of the names, dtypes and shapes of the tensors
  *   whose value are encoded by `buffer`.
  * @return A map from tensor name to tensor value, with the names corresponding
  *   to names in `specs`.
  * @throws Error, if any of the tensors has unsupported dtype.
  */
-declare function decodeWeights(buffer: ArrayBuffer, specs: WeightsManifestEntry[]): NamedTensorMap;
+declare function decodeWeights(weightData: WeightData, specs: WeightsManifestEntry[]): NamedTensorMap;
 
 export declare const DenseBincount = "DenseBincount";
 
@@ -2515,7 +2600,7 @@ export declare const diag: typeof diag_;
  * tf.diag(x).print()
  * ```
  * ```js
- * const x = tf.tensor2d([1, 2, 3, 4, 5, 6, 6, 8], [4, 2])
+ * const x = tf.tensor2d([1, 2, 3, 4, 5, 6, 7, 8], [4, 2])
  *
  * tf.diag(x).print()
  * ```
@@ -2535,7 +2620,7 @@ export declare const dilation2d: typeof dilation2d_;
  * Computes the grayscale dilation over the input `x`.
  *
  * @param x The input tensor, rank 3 or rank 4 of shape
- *     `[batch, height, width, inChannels]`. If rank 3, batch of 1 is assumed.
+ *     `[batch, height, width, depth]`. If rank 3, batch of 1 is assumed.
  * @param filter The filter tensor, rank 3, of shape
  *     `[filterHeight, filterWidth, depth]`.
  * @param strides The strides of the sliding window for each dimension of the
@@ -2693,6 +2778,48 @@ export declare const dot: typeof dot_;
  * @doc {heading: 'Operations', subheading: 'Matrices'}
  */
 declare function dot_(t1: Tensor | TensorLike, t2: Tensor | TensorLike): Tensor;
+
+export declare const Draw = "Draw";
+
+/**
+ * Draws a `tf.Tensor` to a canvas.
+ *
+ * When the dtype of the input is 'float32', we assume values in the range
+ * [0-1]. Otherwise, when input is 'int32', we assume values in the range
+ * [0-255].
+ *
+ * @param image The tensor to draw on the canvas. Must match one of
+ * these shapes:
+ *   - Rank-2 with shape `[height, width`]: Drawn as grayscale.
+ *   - Rank-3 with shape `[height, width, 1]`: Drawn as grayscale.
+ *   - Rank-3 with shape `[height, width, 3]`: Drawn as RGB with alpha set in
+ *     `imageOptions` (defaults to 1, which is opaque).
+ *   - Rank-3 with shape `[height, width, 4]`: Drawn as RGBA.
+ * @param canvas The canvas to draw to.
+ * @param options The configuration arguments for image to be drawn and the
+ *     canvas to draw to.
+ *
+ * @doc {heading: 'Browser', namespace: 'browser'}
+ */
+declare function draw(image: Tensor2D | Tensor3D | TensorLike, canvas: HTMLCanvasElement, options?: DrawOptions): void;
+
+export declare interface DrawAttrs {
+    canvas: HTMLCanvasElement;
+    options?: DrawOptions;
+}
+
+export declare type DrawInputs = Pick<NamedTensorInfoMap, 'image'>;
+
+declare interface DrawOptions {
+    /**
+     * Optional. An object of options to customize the values of image tensor.
+     */
+    imageOptions?: ImageOptions;
+    /**
+     * Optional. An object to configure the context of the canvas to draw to.
+     */
+    contextOptions?: ContextOptions;
+}
 
 export declare const dropout: typeof dropout_;
 
@@ -3091,6 +3218,35 @@ declare class EngineState {
     dispose(): void;
 }
 
+export declare const ensureShape: typeof ensureShape_;
+
+/**
+ * Checks the input tensor mathes the given shape.
+ *
+ * Given an input tensor, returns a new tensor with the same values as the
+ * input tensor with shape `shape`.
+ *
+ * The method supports the null value in tensor. It will still check the shapes,
+ * and null is a placeholder.
+ *
+ *
+ * ```js
+ * const x = tf.tensor1d([1, 2, 3, 4]);
+ * const y = tf.tensor1d([1, null, 3, 4]);
+ * const z = tf.tensor2d([1, 2, 3, 4], [2,2]);
+ * tf.ensureShape(x, [4]).print();
+ * tf.ensureShape(y, [4]).print();
+ * tf.ensureShape(z, [null, 2]).print();
+ * ```
+ *
+ * @param x The input tensor to be ensured.
+ * @param shape A TensorShape representing the shape of this tensor, an array
+ *     or null.
+ *
+ * @doc {heading: 'Tensors', subheading: 'Transformations'}
+ */
+declare function ensureShape_<R extends Rank>(x: Tensor, shape: ShapeMap[R]): Tensor;
+
 export declare let ENV: Environment;
 
 /**
@@ -3125,6 +3281,7 @@ export declare class Environment {
     get(flagName: string): FlagValue;
     getNumber(flagName: string): number;
     getBool(flagName: string): boolean;
+    getString(flagName: string): string;
     getFlags(): Flags;
     get features(): Flags;
     set(flagName: string, value: FlagValue): void;
@@ -3372,7 +3529,7 @@ number
  * If not, `tf.util.fetch` returns a platform-specific solution.
  *
  * ```js
- * const resource = await tf.util.fetch('https://unpkg.com/@tensorflow/tfjs');
+ * const resource = await tf.util.fetch('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
  * // handle response
  * ```
  *
@@ -3417,7 +3574,7 @@ export declare const Fill = "Fill";
  * @param shape An array of integers defining the output tensor shape.
  * @param value The scalar value to fill the tensor with.
  * @param dtype The type of an element in the resulting tensor. Defaults to
- * 'float'.
+ *     'float32' if the given param value is a number, otherwise 'string'.
  *
  * @doc {heading: 'Tensors', subheading: 'Creation'}
  */
@@ -3450,7 +3607,7 @@ declare type Flags = {
     [featureName: string]: FlagValue;
 };
 
-declare type FlagValue = number | boolean;
+declare type FlagValue = number | boolean | string;
 
 /**
  *  Flattens an arbitrarily nested array.
@@ -3559,7 +3716,7 @@ declare type FromConfigMethod<T extends Serializable> = (cls: SerializableConstr
  *
  * @returns A passthrough `IOHandler` that simply loads the provided data.
  */
-declare function fromMemory(modelArtifacts: {} | ModelArtifacts, weightSpecs?: WeightsManifestEntry[], weightData?: ArrayBuffer, trainingConfig?: TrainingConfig): IOHandler;
+declare function fromMemory(modelArtifacts: {} | ModelArtifacts, weightSpecs?: WeightsManifestEntry[], weightData?: WeightData, trainingConfig?: TrainingConfig): IOHandler;
 
 /**
  * Creates an IOHandler that loads model artifacts from memory.
@@ -3582,7 +3739,7 @@ declare function fromMemory(modelArtifacts: {} | ModelArtifacts, weightSpecs?: W
  *
  * @returns A passthrough `IOHandlerSync` that simply loads the provided data.
  */
-declare function fromMemorySync(modelArtifacts: {} | ModelArtifacts, weightSpecs?: WeightsManifestEntry[], weightData?: ArrayBuffer, trainingConfig?: TrainingConfig): IOHandlerSync;
+declare function fromMemorySync(modelArtifacts: {} | ModelArtifacts, weightSpecs?: WeightsManifestEntry[], weightData?: WeightData, trainingConfig?: TrainingConfig): IOHandlerSync;
 
 export declare const FromPixels = "FromPixels";
 
@@ -4166,7 +4323,7 @@ declare const getLoadHandlers: (url: string | string[], loadOptions?: LoadOption
  */
 declare function getModelArtifactsForJSON(modelJSON: ModelJSON, loadWeights: (weightsManifest: WeightsManifestConfig) => Promise<[
 WeightsManifestEntry[],
-ArrayBuffer
+WeightData
 ]>): Promise<ModelArtifacts>;
 
 /**
@@ -4175,12 +4332,12 @@ ArrayBuffer
  * @param modelJSON Object containing the parsed JSON of `model.json`
  * @param weightSpecs The list of WeightsManifestEntry for the model. Must be
  *     passed if the modelJSON has a weightsManifest.
- * @param weightData An ArrayBuffer of weight data for the model corresponding
- *     to the weights in weightSpecs. Must be passed if the modelJSON has a
- *     weightsManifest.
+ * @param weightData An ArrayBuffer or array of ArrayBuffers of weight data for
+ *     the model corresponding to the weights in weightSpecs. Must be passed if
+ *     the modelJSON has a weightsManifest.
  * @returns A Promise of the `ModelArtifacts`, as described by the JSON file.
  */
-declare function getModelArtifactsForJSONSync(modelJSON: ModelJSON, weightSpecs?: WeightsManifestEntry[], weightData?: ArrayBuffer): ModelArtifacts;
+declare function getModelArtifactsForJSONSync(modelJSON: ModelJSON, weightSpecs?: WeightsManifestEntry[], weightData?: WeightData): ModelArtifacts;
 
 /**
  * Populate ModelArtifactsInfo fields for a model with JSON topology.
@@ -4434,7 +4591,6 @@ export declare interface GPUData {
     texture?: WebGLTexture;
     buffer?: GPUBuffer;
     texShape?: [number, number];
-    bufSize?: number;
 }
 
 /**
@@ -4710,6 +4866,15 @@ export declare const image: {
     transform: (image: TensorLike | Tensor4D, transforms: TensorLike | Tensor2D, interpolation?: "nearest" | "bilinear", fillMode?: "nearest" | "constant" | "reflect" | "wrap", fillValue?: number, outputShape?: [number, number]) => Tensor4D;
 };
 
+declare interface ImageOptions {
+    /**
+     * Optional. A number in range [0-1]. If the image is a 2D tensor or a 3D
+     * tensor with 1 or 3 channels, the alpha channels would set as its value;
+     * otherwise, it would not make effects.
+     */
+    alpha?: number;
+}
+
 export declare type ImagInputs = Pick<NamedTensorInfoMap, 'input'>;
 
 /**
@@ -4722,7 +4887,7 @@ export declare type ImagInputs = Pick<NamedTensorInfoMap, 'input'>;
  */
 declare function indexToLoc(index: number, rank: number, strides: number[]): number[];
 
-declare function inferDtype(values: TensorLike | WebGLData): DataType;
+declare function inferDtype(values: TensorLike | WebGLData | WebGPUData): DataType;
 
 /**
  * Common interface for a machine learning model that can do inference.
@@ -4816,6 +4981,7 @@ declare namespace io {
         removeModel,
         browserFiles,
         browserHTTPRequest,
+        CompositeArrayBuffer,
         concatenateArrayBuffers,
         decodeWeights,
         encodeWeights,
@@ -4846,6 +5012,7 @@ declare namespace io {
         SaveHandler,
         SaveResult,
         TrainingConfig,
+        WeightData,
         WeightGroup,
         weightsLoaderFactory,
         WeightsManifestConfig,
@@ -5066,7 +5233,7 @@ export declare class KernelBackend implements TensorStorage, Backend, BackendTim
     disposeData(dataId: object, force?: boolean): boolean;
     write(values: BackendValues, shape: number[], dtype: DataType): DataId;
     move(dataId: DataId, values: BackendValues, shape: number[], dtype: DataType, refCount: number): void;
-    createTensorFromTexture(values: WebGLData, shape: number[], dtype: DataType): Tensor;
+    createTensorFromGPUData(values: WebGLData | WebGPUData, shape: number[], dtype: DataType): Tensor;
     memory(): {
         unreliable: boolean;
         reasons?: string[];
@@ -5191,7 +5358,7 @@ export declare type LessEqualInputs = BinaryInputs;
 export declare type LessInputs = BinaryInputs;
 
 export declare const linalg: {
-    bandPart: <T extends Tensor<Rank>>(a: TensorLike | T, numLower: number, numUpper: number) => T;
+    bandPart: <T extends Tensor<Rank>>(a: TensorLike | T, numLower: number | Scalar, numUpper: number | Scalar) => T;
     gramSchmidt: (xs: Tensor2D | Tensor1D[]) => Tensor2D | Tensor1D[];
     qr: (x: Tensor<Rank>, fullMatrices?: boolean) => [Tensor<Rank>, Tensor<Rank>];
 };
@@ -5725,6 +5892,13 @@ export declare const matMul: typeof matMul_;
 declare function matMul_<T extends Tensor>(a: Tensor | TensorLike, b: Tensor | TensorLike, transposeA?: boolean, transposeB?: boolean): T;
 
 declare const matMul_2: typeof fusedMatMul_;
+
+export declare const MatrixBandPart = "MatrixBandPart";
+
+export declare interface MatrixBandPartAttrs {
+}
+
+export declare type MatrixBandPartInputs = Pick<NamedTensorInfoMap, 'input' | 'numLower' | 'numUpper'>;
 
 export declare const Max = "Max";
 
@@ -6302,10 +6476,12 @@ declare interface ModelArtifacts {
      */
     weightSpecs?: WeightsManifestEntry[];
     /**
-     * Binary buffer for all weight values concatenated in the order specified
-     * by `weightSpecs`.
+     * Binary buffer(s) for all weight values in the order specified by
+     * `weightSpecs`. This may be a single ArrayBuffer of all the weights
+     * concatenated together or an Array of ArrayBuffers containing the weights
+     * (weights may be sharded across multiple ArrayBuffers).
      */
-    weightData?: ArrayBuffer;
+    weightData?: WeightData;
     /**
      * Hard-coded format name for models saved from TensorFlow.js or converted
      * by TensorFlow.js Converter.
@@ -6534,7 +6710,7 @@ export declare class MomentumOptimizer extends SGDOptimizer {
     private momentum;
     private useNesterov;
     /** @nocollapse */
-    static className: string;
+    static get className(): string;
     private m;
     private accumulations;
     constructor(learningRate: number, momentum: number, useNesterov?: boolean);
@@ -7408,6 +7584,7 @@ export declare interface Platform {
     /** Decode the provided bytes into a string using the provided encoding. */
     decode(bytes: Uint8Array, encoding: string): string;
     setTimeoutCustom?(functionRef: Function, delay: number): void;
+    isTypedArray(a: unknown): a is Float32Array | Int32Array | Uint8Array | Uint8ClampedArray;
 }
 
 declare function play(video: HTMLVideoElement): Promise<void>;
@@ -7851,10 +8028,37 @@ export declare const randomUniform: typeof randomUniform_;
  * @param maxval The upper bound on the range of random values to generate.
  *   Defaults to 1.
  * @param dtype The data type of the output tensor. Defaults to 'float32'.
+ * @param seed An optional int. Defaults to 0. If seed is set to be non-zero,
+ *   the random number generator is seeded by the given seed. Otherwise, it is
+ *   seeded by a random seed.
  *
  * @doc {heading: 'Tensors', subheading: 'Random'}
  */
 declare function randomUniform_<R extends Rank>(shape: ShapeMap[R], minval?: number, maxval?: number, dtype?: DataType, seed?: number | string): Tensor<R>;
+
+export declare const randomUniformInt: typeof randomUniformInt_;
+
+/**
+ * Creates a `tf.Tensor` with integers sampled from a uniform distribution.
+ *
+ * The generated values are uniform integers in the range [minval, maxval). The
+ * lower bound minval is included in the range, while the upper bound maxval is
+ * excluded.
+ *
+ * ```js
+ * tf.randomUniformInt([2, 2], 0, 10).print();
+ * ```
+ *
+ * @param shape An array of integers defining the output tensor shape.
+ * @param minval Inclusive lower bound on the generated integers.
+ * @param maxval Exclusive upper bound on the generated integers.
+ * @param seed An optional int. Defaults to 0. If seed is set to be non-zero,
+ *   the random number generator is seeded by the given seed. Otherwise, it is
+ *   seeded by a random seed.
+ *
+ * @doc {heading: 'Tensors', subheading: 'Random'}
+ */
+declare function randomUniformInt_<R extends Rank>(shape: ShapeMap[R], minval: number, maxval: number, seed?: number | string): Tensor<R>;
 
 /**
  * Returns a sample from a uniform [a, b) distribution.
@@ -8345,7 +8549,7 @@ export declare class RMSPropOptimizer extends Optimizer {
     protected momentum: number;
     protected epsilon: number;
     /** @nocollapse */
-    static className: string;
+    static get className(): string;
     private centered;
     private accumulatedMeanSquares;
     private accumulatedMoments;
@@ -8903,7 +9107,7 @@ export declare function setPlatform(platformName: string, platform: Platform): v
 export declare class SGDOptimizer extends Optimizer {
     protected learningRate: number;
     /** @nocollapse */
-    static className: string;
+    static get className(): string;
     protected c: Scalar;
     constructor(learningRate: number);
     applyGradients(variableGradients: NamedTensorMap | NamedTensor[]): void;
@@ -8935,6 +9139,7 @@ export declare class SGDOptimizer extends Optimizer {
  * limitations under the License.
  * =============================================================================
  */
+/// <reference path="../src/types/webgpu.d.ts" />
 /** @docalias number[] */
 export declare interface ShapeMap {
     R0: number[];
@@ -9619,6 +9824,16 @@ declare function startForAxis(beginMask: number, startIndices: number[], strides
 
 declare function startIndicesWithElidedDims(beginMask: number, ellipsisInsertionIndex: number, numElidedAxes: number, originalBegin: number[], inputShape: number[]): number[];
 
+export declare const StaticRegexReplace = "StaticRegexReplace";
+
+export declare interface StaticRegexReplaceAttrs {
+    pattern: string;
+    rewrite: string;
+    replaceGlobal: boolean;
+}
+
+export declare type StaticRegexReplaceInputs = UnaryInputs;
+
 /**
  * TensorFlow.js-only kernels
  */
@@ -9627,7 +9842,7 @@ export declare const Step = "Step";
 export declare const step: typeof step_;
 
 /**
- * Computes step of the input `tf.Tensor` element-wise: `x > 0 ? 1 : alpha * x`
+ * Computes step of the input `tf.Tensor` element-wise: `x > 0 ? 1 : alpha`
  *
  * ```js
  * const x = tf.tensor1d([0, 2, -1, -3]);
@@ -9635,7 +9850,7 @@ export declare const step: typeof step_;
  * x.step(.5).print();  // or tf.step(x, .5)
  * ```
  * @param x The input tensor.
- * @param alpha The gradient when input is negative.
+ * @param alpha The gradient when input is negative. Defaults to 0.
  *
  * @doc {heading: 'Operations', subheading: 'Basic math'}
  */
@@ -9705,12 +9920,15 @@ export declare type StridedSliceInputs = Pick<NamedTensorInfoMap, 'x'>;
 
 declare function stridesForAxis(strides: number[], axis: number, ellipsisMask: number): number;
 
+declare function stridesOrDilationsArePositive(values: number | number[]): boolean;
+
 declare function stridesWithElidedDims(strides: number[], ellipsisInsertionIndex: number, numElidedAxes: number, inputShape: number[]): number[];
 
 export declare const string: {
     stringNGrams: (data: TensorLike | Tensor1D, dataSplits: TensorLike | Tensor<Rank>, separator: string, nGramWidths: number[], leftPad: string, rightPad: string, padWidth: number, preserveShortSequences: boolean) => NamedTensorMap;
     stringSplit: (input: TensorLike | Tensor1D, delimiter: ScalarLike | Scalar, skipEmpty?: boolean) => NamedTensorMap;
     stringToHashBucketFast: (input: TensorLike | Tensor<Rank>, numBuckets: number) => Tensor<Rank>;
+    staticRegexReplace: (input: TensorLike | Tensor<Rank>, pattern: string, rewrite: string, replaceGlobal?: boolean) => Tensor<Rank>;
 };
 
 export declare const StringNGrams = "StringNGrams";
@@ -9975,12 +10193,10 @@ export declare class Tensor<R extends Rank = Rank> implements TensorInfo {
      *        texShape: [number, number] // [height, width]
      *     }
      *
-     *     For WebGPU backend, a GPUData contains the new buffer and
-     *     its information.
+     *     For WebGPU backend, a GPUData contains the new buffer.
      *     {
      *        tensorRef: The tensor that is associated with this buffer,
      *        buffer: GPUBuffer,
-     *        bufSize: number
      *     }
      *
      *     Remember to dispose the GPUData after it is used by
@@ -10101,27 +10317,107 @@ export declare class Tensor<R extends Rank = Rank> implements TensorInfo {
  *
  * const tex = a.dataToGPU();
  * ```
+ *
+ * ```js
+ * // Pass a `WebGPUData` object and specify a shape yourself.
+ *
+ * // This makes it possible for TF.js applications to avoid GPU / CPU sync.
+ * // For example, if your application includes a preprocessing step on the GPU,
+ * // you could upload the GPU output directly to TF.js, rather than first
+ * // downloading the values. Unlike WebGL, this optionally supports zero copy
+ * // by WebGPUData.zeroCopy. When zeroCopy is false or undefined(default), this
+ * // passing GPUBuffer can be destroyed after tensor is created. When zeroCopy
+ * // is true, this GPUBuffer is bound directly by the tensor, so do not destroy
+ * // this GPUBuffer until all access is done.
+ *
+ * // Example for WebGPU:
+ * function createGPUBufferFromData(device, data, dtype) {
+ *   const bytesPerElement = 4;
+ *   const sizeInBytes = data.length * bytesPerElement;
+ *
+ *   const gpuWriteBuffer = device.createBuffer({
+ *     mappedAtCreation: true,
+ *     size: sizeInBytes,
+ *     usage: GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC
+ *   });
+ *   const arrayBuffer = gpuWriteBuffer.getMappedRange();
+ *   if (dtype === 'float32') {
+ *     new Float32Array(arrayBuffer).set(data);
+ *   } else if (dtype === 'int32') {
+ *     new Int32Array(arrayBuffer).set(data);
+ *   } else {
+ *     throw new Error(
+ *         `Creating tensor from GPUBuffer only supports` +
+ *         `'float32'|'int32' dtype, while the dtype is ${dtype}.`);
+ *   }
+ *   gpuWriteBuffer.unmap();
+ *
+ *   const gpuReadBuffer = device.createBuffer({
+ *     mappedAtCreation: false,
+ *     size: sizeInBytes,
+ *     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE |
+ *         GPUBufferUsage.COPY_SRC
+ *   });
+ *
+ *   const copyEncoder = device.createCommandEncoder();
+ *   copyEncoder.copyBufferToBuffer(
+ *       gpuWriteBuffer, 0, gpuReadBuffer, 0, sizeInBytes);
+ *   const copyCommands = copyEncoder.finish();
+ *   device.queue.submit([copyCommands]);
+ *   gpuWriteBuffer.destroy();
+ *   return gpuReadBuffer;
+ * }
+ *
+ * await tf.setBackend('webgpu').catch(
+ *     () => {throw new Error(
+ *         'Failed to use WebGPU backend. Please use Chrome Canary to run.')});
+ * const dtype = 'float32';
+ * const device = tf.backend().device;
+ * const aData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+ * const bData = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4];
+ * const expected = [2, 4, 6, 8, 6, 8, 10, 12, 10, 12, 14, 16, 14, 16, 18, 20];
+ * const aBuffer = createGPUBufferFromData(device, aData, dtype);
+ * const shape = [aData.length];
+ * // To use zeroCopy, use {buffer: aBuffer, zeroCopy: true} instead and destroy
+ * // aBuffer untill all access is done.
+ * const a = tf.tensor({buffer: aBuffer}, shape, dtype);
+ * const b = tf.tensor(bData, shape, dtype);
+ * const result = tf.add(a, b);
+ * a.dispose();
+ * b.dispose();
+ * result.dispose();
+ * aBuffer.destroy();
+ * ```
  * @param values The values of the tensor. Can be nested array of numbers,
- *     or a flat array, or a `TypedArray`, or a `WebGLData` object. If the
- * values are strings, they will be encoded as utf-8 and kept as `Uint8Array[]`.
- * If the values is a `WebGLData` object, the dtype could only be 'float32' or
- * 'int32' and the object has to have: 1. texture, a `WebGLTexture`, the texture
- * must share the same `WebGLRenderingContext` with TFJS's WebGL backend (you
- * could create a custom WebGL backend from your texture's canvas) and the
- * internal texture format for the input texture must be floating point or
- * normalized integer; 2. height, the height of the texture; 3. width, the width
- * of the texture; 4. channels, a non-empty subset of 'RGBA', indicating the
- * values of which channels will be passed to the tensor, such as 'R' or 'BR'
- * (The order of the channels affect the order of tensor values. ). (If the
- * values passed from texture is less than the tensor size, zeros will be padded
- * at the rear.)
+ *     or a flat array, or a `TypedArray`, or a `WebGLData` object, or a
+ * `WebGPUData` object. If the values are strings, they will be encoded as utf-8
+ * and kept as `Uint8Array[]`. If the values is a `WebGLData` object, the dtype
+ * could only be 'float32' or 'int32' and the object has to have: 1. texture, a
+ * `WebGLTexture`, the texture must share the same `WebGLRenderingContext` with
+ * TFJS's WebGL backend (you could create a custom WebGL backend from your
+ * texture's canvas) and the internal texture format for the input texture must
+ * be floating point or normalized integer; 2. height, the height of the
+ * texture; 3. width, the width of the texture; 4. channels, a non-empty subset
+ * of 'RGBA', indicating the values of which channels will be passed to the
+ * tensor, such as 'R' or 'BR' (The order of the channels affect the order of
+ * tensor values. ). (If the values passed from texture is less than the tensor
+ * size, zeros will be padded at the rear.). If the values is a `WebGPUData`
+ * object, the dtype could only be 'float32' or 'int32 and the object has to
+ * have: buffer, a `GPUBuffer`. The buffer must: 1. share the same `GPUDevice`
+ * with TFJS's WebGPU backend; 2. buffer.usage should at least support
+ * GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC; 3. buffer.size should not
+ * be smaller than the byte size of tensor shape. WebGPUData optionally supports
+ * zero copy by flag zeroCopy. When zeroCopy is false or undefined(default),
+ * this passing GPUBuffer can be destroyed after tensor is created. When
+ * zeroCopy is true, this GPUBuffer is bound directly by the tensor, so do not
+ * destroy this GPUBuffer until all access is done.
  * @param shape The shape of the tensor. Optional. If not provided,
  *   it is inferred from `values`.
  * @param dtype The data type.
  *
  * @doc {heading: 'Tensors', subheading: 'Creation'}
  */
-export declare function tensor<R extends Rank>(values: TensorLike | WebGLData, shape?: ShapeMap[R], dtype?: DataType): Tensor<R>;
+export declare function tensor<R extends Rank>(values: TensorLike | WebGLData | WebGPUData, shape?: ShapeMap[R], dtype?: DataType): Tensor<R>;
 
 /** @doclink Tensor */
 export declare type Tensor1D = Tensor<Rank.R1>;
@@ -10378,6 +10674,48 @@ declare type TensorLike5D = TypedArray | number[] | number[][][][][] | boolean[]
 /** @docalias TypedArray|Array */
 declare type TensorLike6D = TypedArray | number[] | number[][][][][][] | boolean[] | boolean[][][][][][] | string[] | string[][][][][][] | Uint8Array[] | Uint8Array[][][][][];
 
+export declare const TensorScatterUpdate = "TensorScatterUpdate";
+
+export declare const tensorScatterUpdate: typeof tensorScatterUpdate_;
+
+/**
+ * Creates a new tensor by applying sparse updates to individual
+ * values or slices to the passed in tensor according to
+ * indices. This operator is the similar to scatterNd op, except that the
+ * udpates are scattered on an existing tensor (as opposed to a zero-tensor).
+ *
+ * If indices contains duplicates, then we pick the last update for the index.
+ *
+ * If an out of bound index is found on CPU, an error is returned.
+ *
+ * Warning: There are some GPU specific semantics for this operation.
+ *  - If an out of bound index is found, the index is ignored.
+ *  - The order in which updates are applied is nondeterministic, so the output
+ * will be nondeterministic if indices contains duplicates.
+ * ```js
+ * const shape = [8];
+ * const tensor = tf.ones(shape);
+ * const indices = tf.tensor2d([4, 3, 1, 7], [4, 1], 'int32');
+ * const updates = tf.tensor1d([9, 10, 11, 12]);
+ *
+ * tf.tensorScatterUpdate(tensor, indices, updates).print();
+ *    //[1, 11, 1, 10, 9, 1, 1, 12]
+ * ```
+ *
+ * @param tensor A Tensor. Tensor to copy/update.
+ * @param indices The tensor contains the indices into the output tensor, must
+ *     have at least 2 axes: (num_updates, index_depth).
+ * @param updates The tensor contains the value for the indices.
+ *
+ * @doc {heading: 'Operations', subheading: 'Slicing and Joining'}
+ */
+declare function tensorScatterUpdate_<R extends Rank>(tensor: Tensor<R> | TensorLike, indices: Tensor | TensorLike, updates: Tensor | TensorLike): Tensor<R>;
+
+export declare interface TensorScatterUpdateAttrs {
+}
+
+export declare type TensorScatterUpdateInputs = Pick<NamedTensorInfoMap, 'tensor' | 'indices' | 'updates'>;
+
 declare interface TensorStorage {
     read(dataId: DataId): Promise<BackendValues>;
     readSync(dataId: DataId): BackendValues;
@@ -10483,13 +10821,13 @@ export declare const tile: typeof tile_;
  * ```js
  * const a = tf.tensor1d([1, 2]);
  *
- * a.tile([2]).print();    // or a.tile([2])
+ * a.tile([2]).print();    // or tf.tile(a, [2])
  * ```
  *
  * ```js
  * const a = tf.tensor2d([1, 2, 3, 4], [2, 2]);
  *
- * a.tile([1, 2]).print();  // or a.tile([1, 2])
+ * a.tile([1, 2]).print();  // or tf.tile(a, [1,2])
  * ```
  * @param x The tensor to tile.
  * @param reps Determines the number of replications per dimension.
@@ -10601,15 +10939,7 @@ export declare type TopKInputs = Pick<NamedTensorInfoMap, 'x'>;
 
 declare function toTypedArray(a: TensorLike, dtype: DataType): TypedArray;
 
-export declare const train: {
-    sgd: typeof OptimizerConstructors.sgd;
-    momentum: typeof OptimizerConstructors.momentum;
-    adadelta: typeof OptimizerConstructors.adadelta;
-    adagrad: typeof OptimizerConstructors.adagrad;
-    rmsprop: typeof OptimizerConstructors.rmsprop;
-    adamax: typeof OptimizerConstructors.adamax;
-    adam: typeof OptimizerConstructors.adam;
-};
+export declare const train: typeof OptimizerConstructors;
 
 /** Model training configuration. */
 declare interface TrainingConfig {
@@ -10885,6 +11215,8 @@ declare namespace util {
         fetch_2 as fetch,
         encodeString,
         decodeString,
+        isTypedArray,
+        flatten,
         shuffle,
         shuffleCombo,
         clamp,
@@ -10896,9 +11228,9 @@ declare namespace util {
         assert,
         assertShapesMatch,
         assertNonNull,
-        flatten,
         sizeFromShape,
         isScalarShape,
+        arraysEqualWithNull,
         arraysEqual,
         isInt,
         tanh_2 as tanh,
@@ -10914,7 +11246,6 @@ declare namespace util {
         checkConversionForErrors,
         isValidDtype,
         hasEncodingLoss,
-        isTypedArray,
         bytesPerElement,
         bytesFromStringArray,
         isString,
@@ -10925,6 +11256,7 @@ declare namespace util {
         nearestDivisor,
         computeStrides,
         toNestedArray,
+        convertBackendValuesAndArrayBuffer,
         makeOnesTypedArray,
         makeZerosTypedArray,
         makeZerosNestedTypedArray,
@@ -11130,6 +11462,22 @@ export declare interface WebGLData {
     width: number;
     channels: WebGLChannels;
 }
+
+/**
+ * Type for representing a buffer data to create a tensor. Buffer usage should
+ * at least support GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC. When
+ * zeroCopy is false or undefined (default), this GPUBuffer will be copied to
+ * the tensor's resource buffer. When zeroCopy is true, tensor will use this
+ * GPUBuffer as tensor's resource buffer, user should not destroy this GPUBuffer
+ * until all access is done. If not specified at creating a tensor, tensor type
+ * is float32.
+ */
+export declare interface WebGPUData {
+    buffer: GPUBuffer;
+    zeroCopy?: boolean;
+}
+
+declare type WeightData = ArrayBuffer | ArrayBuffer[];
 
 /**
  * Group to which the weight belongs.

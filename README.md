@@ -13,7 +13,7 @@ Angular [npm](https://www.npmjs.com/package/ngx-scanner-face)
   </tr>
   <tr>
     <td>ngx-scanner-face</td>
-    <td>1.0.0</td>
+    <td>1.1.6</td>
   </tr>
 </table>
 
