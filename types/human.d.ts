@@ -1,4 +1,4 @@
-/// <reference path="../src/types/webgpu.d.ts" />
+/// <reference path="./webgpu.d.ts" />
 
 /** meta-function that performs draw for: canvas, face, body, hand */
 declare function all(inCanvas: AnyCanvas, result: Result, drawOptions?: Partial<DrawOptions>): Promise<[void, void, void, void, void] | null>;
